@@ -116,7 +116,8 @@ then
 	EXAMPLE="qtbase/examples/widgets/widgets/calculator/calculator -platform"
 	export QT_DEBUG_BACKINGSTORE=1
 	export QT_QPA_PLATFORMTHEME=gtk3
-	export QT_DMINI2D_BLITTER_DEBUGPAINT=1
+	#export QT_DMINI2D_BLITTER_DEBUGPAINT=1
+	export QT_DIRECT2D_BLITTER_DEBUGPAINT=1
 	sudo $EXAMPLE directfb --dfb:system=FBDev
 	popd
 fi
