@@ -1,0 +1,29 @@
+#!/bin/bash
+
+#Deletes all processes with the given name.
+
+PROCESS=$1
+FILE=temp
+
+ps -jeH | grep $PROCESS >> $FILE
+#cat $FILE
+
+NUM=$(ps -jeH | grep $PROCESS | wc -l)
+#printf "$NUM\n"
+
+if [ $NUM = 0 ]
+then
+	printf "There are no processes with this name...\n"
+	exit 0
+fi
+
+printf "Deleting processes:\n"
+awk '{ print $1, $NF }' $FILE
+
+sudo killall --signal 9 $PROCESS 
+
+#for i in 
+
+#sudo kill -9
+
+rm $FILE
