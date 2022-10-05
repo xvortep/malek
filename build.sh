@@ -2,7 +2,14 @@
 
 TO_RUN=$1
 
-WITH_X=1
+WITH_X=0
+
+# Wipe...
+if [ $TO_RUN = 404 ]
+then
+	sudo rm -fr build
+	sudo rm -fr qt5
+fi
 
 # Dependencies...
 if [ $TO_RUN = 1 ]
@@ -42,11 +49,20 @@ then
 	popd
 fi
 
+INCLUDES_WRITTEN=$2
 # Our platform...
 if [ $TO_RUN = 3 ]
 then
-	unzip mini2d.zip
+	if [ $INCLUDES_WRITTEN = 0 ]
+	then
+		unzip mini2d.zip
+		cp utils.h mini2d/
+		exit 0
+	fi
 	mv mini2d qt5/qtbase/src/plugins/platforms
+	rm qt5/qtbase/src/plugins/platforms/platforms.pro
+	cp platforms.pro qt5/qtbase/src/plugins/platforms
+	cat qt5/qtbase/src/plugins/platforms/platforms.pro | grep mini2d
 	ls qt5/qtbase/src/plugins/platforms
 fi
 
@@ -57,10 +73,10 @@ then
 	pushd build/
 	#../qt5/configure -help
 	#../qt5/configure -list-features
-	FLAGS="-qpa mini2d,directfb,minimal"
+	FLAGS="-qpa mini2d;directfb;minimal"
 	if [ $WITH_X = 1 ]
 	then
-		FLAGS="$FLAGS,xcb" # Additional QPA
+		FLAGS="$FLAGS;xcb" # Additional QPA
 		FLAGS="$FLAGS -xcb" #TODO 
 	fi
 	../qt5/configure \
@@ -113,12 +129,13 @@ fi
 if [ $TO_RUN = 6 ]
 then
 	pushd build/
+	sudo ls
 	EXAMPLE="qtbase/examples/widgets/widgets/calculator/calculator -platform"
 	export QT_DEBUG_BACKINGSTORE=1
 	export QT_QPA_PLATFORMTHEME=gtk3
-	#export QT_DMINI2D_BLITTER_DEBUGPAINT=1
-	export QT_DIRECT2D_BLITTER_DEBUGPAINT=1
-	sudo $EXAMPLE directfb --dfb:system=FBDev
+	export QT_DMINI2D_BLITTER_DEBUGPAINT=1
+	#export QT_DIRECT2D_BLITTER_DEBUGPAINT=1
+	sudo $EXAMPLE mini2d --dfb:system=FBDev &
 	popd
 fi
 
