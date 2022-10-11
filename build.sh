@@ -77,7 +77,7 @@ then
 	if [ $WITH_X = 1 ]
 	then
 		FLAGS="$FLAGS;xcb" # Additional QPA
-		FLAGS="$FLAGS -xcb" #TODO 
+		FLAGS="$FLAGS -xcb" #TODO
 	fi
 	../qt5/configure \
 		-developer-build \
@@ -93,7 +93,7 @@ then
 		$FLAGS
 	popd
 fi
-	
+
 #gui
 #network
 #sql
@@ -130,12 +130,16 @@ if [ $TO_RUN = 6 ]
 then
 	pushd build/
 	sudo ls
-	EXAMPLE="qtbase/examples/widgets/widgets/calculator/calculator -platform"
+	#APP_NAME=calculator
+	APP_NAME=analogclock
+	APP=./qtbase/examples/widgets/widgets/$APP_NAME/$APP_NAME
+	EXAMPLE="$APP -platform"
 	export QT_DEBUG_BACKINGSTORE=1
 	export QT_QPA_PLATFORMTHEME=gtk3
 	export QT_DMINI2D_BLITTER_DEBUGPAINT=1
 	#export QT_DIRECT2D_BLITTER_DEBUGPAINT=1
-	sudo $EXAMPLE mini2d --dfb:system=FBDev &
+	sudo bash -c "$EXAMPLE mini2d --dfb:system=FBDev 2>../trace.txt 1>../trace_engine.txt" &
+	#$APP # Over X
 	popd
 fi
 
