@@ -2,7 +2,7 @@
 
 TO_RUN=$1
 
-WITH_X=0
+WITH_X=1
 
 # Wipe...
 if [ $TO_RUN = 404 ]
@@ -73,10 +73,10 @@ then
 	pushd build/
 	#../qt5/configure -help
 	#../qt5/configure -list-features
-	FLAGS="-qpa mini2d;directfb;minimal"
+	FLAGS="-qpa xcb;mini2d;directfb;minimal"
 	if [ $WITH_X = 1 ]
 	then
-		FLAGS="$FLAGS;xcb" # Additional QPA
+		#FLAGS="$FLAGS;xcb" # Additional QPA
 		FLAGS="$FLAGS -xcb" #TODO
 	fi
 	../qt5/configure \
@@ -125,21 +125,22 @@ then
 	popd
 fi
 
+APP_NAME=$2
 # Set up and test examples...
 if [ $TO_RUN = 6 ]
 then
 	pushd build/
 	sudo ls
 	#APP_NAME=calculator
-	APP_NAME=analogclock
+	#APP_NAME=analogclock
 	APP=./qtbase/examples/widgets/widgets/$APP_NAME/$APP_NAME
 	EXAMPLE="$APP -platform"
 	export QT_DEBUG_BACKINGSTORE=1
 	export QT_QPA_PLATFORMTHEME=gtk3
 	export QT_DMINI2D_BLITTER_DEBUGPAINT=1
 	#export QT_DIRECT2D_BLITTER_DEBUGPAINT=1
-	sudo bash -c "$EXAMPLE mini2d --dfb:system=FBDev 2>../trace.txt 1>../trace_engine.txt" &
-	#$APP # Over X
+	sudo bash -c "$EXAMPLE xcb 2>../qt_err_trace 1>../qt_cout_trace" &
+	#$APP 1>../qt_cout_trace 2>../qt_err_trace # Over X
 	popd
 fi
 
@@ -147,10 +148,8 @@ exit 0
 
 # Run...
 # With DirectFB
-sudo $EXAMPLE -platform mini2d &
+# sudo $EXAMPLE -platform mini2d &
 # Ctrl+Alt+F2
-sudo kill $!
+# sudo kill $!
 
 #-platform linuxfb -plugin EvdevMouse -plugin EvdevKeyboard #-style motif
-
-popd
