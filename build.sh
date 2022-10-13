@@ -137,8 +137,9 @@ then
 	EXAMPLE="$APP -platform"
 	export QT_DEBUG_BACKINGSTORE=1
 	export QT_QPA_PLATFORMTHEME=gtk3
-	export QT_DMINI2D_BLITTER_DEBUGPAINT=1
+	#export QT_DMINI2D_BLITTER_DEBUGPAINT=1
 	#export QT_DIRECT2D_BLITTER_DEBUGPAINT=1
+	export QT_QPA_PLATFORM=xcb
 	sudo bash -c "$EXAMPLE xcb 2>../qt_err_trace 1>../qt_cout_trace" &
 	#$APP 1>../qt_cout_trace 2>../qt_err_trace # Over X
 	popd
