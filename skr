@@ -1,0 +1,163 @@
+#!/bin/bash
+
+# Read the command
+COMMAND=$1
+
+# Help
+if [ $COMMAND = "help" ]
+then
+	printf "Available commands:\n\tclean - Q.E.D.\n\tpkginst - Installs dependencies.\n\tqt - Grabs the qt5 repository and initialises it.\n\tmini2d - Installs the mini2d plugin.\n\tconfig - Configures QT.\n\tbuild - Runs make.\n\tplatform <PLATFORM> - Sets the platform to the one specified.\n\trun <EXAMPLE> - Runs the specified example.\n"
+	exit 0
+fi
+
+# Wipe...
+if [ $COMMAND = "clean" ]
+then
+	sudo rm -fr build
+	sudo rm -fr qt5
+fi
+
+# Dependencies...
+if [ $COMMAND = "pkginst" ]
+then
+	sudo apt install libx11-dev \
+		libx11-xcb-dev \
+		libxext-dev \
+		libxfixes-dev \
+		libxi-dev \
+		libxrender-dev \
+		libxcb1-dev \
+		libxcb-glx0-dev libxcb-keysyms1-dev \
+		libxcb-image0-dev \
+		libxcb-shm0-dev \
+		libxcb-icccm4-dev \
+		libxcb-sync0-dev \
+		libxcb-xfixes0-dev \
+		libxcb-shape0-dev \
+		libxcb-randr0-dev \
+		libxcb-render-util0-dev \
+		libxcb-xinerama0-dev \
+		libxkbcommon-dev \
+		libxkbcommon-x11-dev
+	sudo apt install libdirectfb-dev
+fi
+
+# Qt5...
+if [ $COMMAND = "qt" ]
+then
+	git clone https://code.qt.io/qt/qt5.git
+	pushd qt5/
+	git checkout 5.15
+	perl init-repository --module-subset=qtbase
+	popd
+fi
+
+# Our platform...
+if [ $COMMAND = "mini2d" ]
+then
+	unzip mini2d.zip
+	mv mini2d qt5/qtbase/src/plugins/platforms
+	rm qt5/qtbase/src/plugins/platforms/platforms.pro
+	cp platforms.pro qt5/qtbase/src/plugins/platforms
+	cat qt5/qtbase/src/plugins/platforms/platforms.pro | grep mini2d
+	ls qt5/qtbase/src/plugins/platforms/mini2d/
+fi
+
+# Configure Qt...
+if [ $COMMAND = "config" ]
+then
+	mkdir build/
+	pushd build/
+	#../qt5/configure -help
+	#../qt5/configure -list-features
+	FLAGS="-qpa xcb;mini2d;directfb;minimal -xcb"
+	../qt5/configure \
+		-developer-build \
+		-opensource \
+		-confirm-license \
+		-Dregister= \
+		-directfb \
+		-nomake tests \
+		-no-opengl \
+		-no-dbus \
+		-no-feature-cups \
+		-no-linuxfb \
+		$FLAGS
+	popd
+fi
+
+#gui
+#network
+#sql
+#xml
+#testlib
+#dbus
+#concurrent
+#widgets
+#harfbuzz
+#system
+#commandlineparser
+#regularexpression
+#angle
+#jpeg
+#png
+#freetype
+#vkgen
+#opengl
+#printer
+#private_tests
+#https://forum.qt.io/topic/70299/reduce-qt-libraries-size/4
+#./configure -v -device arm-none-linux-gnueabi -device-option CROSS_COMPILE=$CROSS_COMPILE -release -confirm-license -opensource -nomake examples -qt-zlib -no-pch -no-largefile -no-c++11 -no-cups -lrt  -linuxfb -no-xcb -no-sse2 -no-sse3 -no-ssse3 -no-sse4.1 -no-sse4.2 -no-accessibility -no-openssl -no-gtkstyle -xplatform devices/arm-none-linux-gnueabi --prefix=/opt/HH/CodeSourceryArm2009q1203/arm-none-linux-gnueabi/libc/usr -no-qml-debug -no-avx -no-avx2 -no-mips_dsp -no-mips_dspr2 -no-mtdev -no-libproxy -no-xkbcommon-evdev -no-xinput2 -no-xcb-xlib -no-nis -no-iconv -no-evdev -no-tslib -no-icu -no-fontconfig -no-dbus -no-use-gold-linker -no-separate-debug-info -no-directfb -no-kms -no-gcc-sysroot -no-libinput -nomake tests -gstreamer 1.0 -force-pkg-config -no-audio-backend -no-freetype -no-harfbuzz -no-qpa
+
+# Build Qt...
+if [ $COMMAND = "build" ]
+then
+	pushd build/
+	time make -j8
+	popd
+fi
+
+PLATFORM=xcb
+# Set platform
+if [ $COMMAND = "platform" ]
+then
+	if [ $# -ne 2 ]
+	then
+		printf "\n--- No platform given. ---\n\n"
+		exit 1
+	fi
+	PLATFORM=$2
+fi
+
+# Set up and test examples...
+if [ $COMMAND = "run" ]
+then
+	if [ $# -ne 2 ]
+	then
+		printf "\n--- No example given. ---\n\n"
+		exit 1
+	fi
+	APP_NAME=$2
+	pushd build/
+	sudo ls
+	APP=./qtbase/examples/widgets/widgets/$APP_NAME/$APP_NAME
+	EXAMPLE="$APP -platform"
+	export QT_DEBUG_BACKINGSTORE=1
+	export QT_QPA_PLATFORMTHEME=gtk3
+	#export QT_DMINI2D_BLITTER_DEBUGPAINT=1
+	#export QT_DIRECT2D_BLITTER_DEBUGPAINT=1
+	#export QT_QPA_PLATFORM=xcb
+	sudo bash -c "$EXAMPLE $PLATFORM 2>../qt_err_trace 1>../qt_cout_trace" &
+	#$APP 1>../qt_cout_trace 2>../qt_err_trace # Over X
+	popd
+fi
+
+exit 0
+
+# Run...
+# With DirectFB
+# sudo $EXAMPLE -platform mini2d &
+# Ctrl+Alt+F2
+# sudo kill $!
+
+#-platform linuxfb -plugin EvdevMouse -plugin EvdevKeyboard #-style motif
