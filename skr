@@ -83,6 +83,7 @@ then
 		-no-dbus \
 		-no-feature-cups \
 		-no-linuxfb \
+		-xcb-native-painting \
 		$FLAGS
 	popd
 fi
@@ -118,8 +119,12 @@ then
 	popd
 fi
 
-PLATFORM=xcb
-# Set platform
+# Set platform...
+if [ -z $PLATFORM ]
+then
+	export PLATFORM=xcb
+fi
+
 if [ $COMMAND = "platform" ]
 then
 	if [ $# -ne 2 ]
@@ -127,7 +132,7 @@ then
 		printf "\n--- No platform given. ---\n\n"
 		exit 1
 	fi
-	PLATFORM=$2
+	export PLATFORM=$2
 fi
 
 # Set up and test examples...
