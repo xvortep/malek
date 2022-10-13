@@ -6,7 +6,7 @@ COMMAND=$1
 # Help
 if [ $COMMAND = "help" ]
 then
-	printf "Available commands:\n\tclean - Q.E.D.\n\tpkginst - Installs dependencies.\n\tqt - Grabs the qt5 repository and initialises it.\n\tmini2d - Installs the mini2d plugin.\n\tconfig - Configures QT.\n\tbuild - Runs make.\n\tplatform <PLATFORM> - Sets the platform to the one specified.\n\trun <EXAMPLE> - Runs the specified example.\n"
+	printf "Available commands:\n\tclean - Q.E.D.\n\tpkginst - Installs dependencies.\n\tqt - Grabs the qt5 repository and initialises it.\n\tmini2d - Installs the mini2d plugin.\n\tconfig - Configures QT.\n\tbuild - Runs make.\n\tplatform <PLATFORM> - Sets the platform to the one specified.\n\trun <EXAMPLE> - Runs the specified example.\n\tcr <PLATFORM> <EXAMPLE> - Complete clean rerun. Run after at least one regualar usage.\n\n"
 	exit 0
 fi
 
@@ -16,6 +16,7 @@ then
 	sudo rm -fr build
 	sudo rm -fr qt5
 fi
+
 
 # Dependencies...
 if [ $COMMAND = "pkginst" ]
@@ -150,6 +151,23 @@ then
 	sudo bash -c "$EXAMPLE $PLATFORM 2>../qt_err_trace 1>../qt_cout_trace" &
 	#$APP 1>../qt_cout_trace 2>../qt_err_trace # Over X
 	popd
+fi
+
+# Complete rerun after one full normal install...
+if [ $COMMAND = "cr" ]
+then
+	if [ $# -ne 3 ]
+	then
+		printf "\n--- Platform or example not given. ---\n\n"
+		exit 1
+	fi
+	./skr clean
+	./skr qt
+	./skr mini2d
+	./skr config
+	./skr build
+	./skr platform $2
+	./skr run $3
 fi
 
 exit 0
