@@ -6,7 +6,7 @@ COMMAND=$1
 # Help
 if [ $COMMAND = "help" ]
 then
-	printf "Available commands:\n\tclean - Q.E.D.\n\tpkginst - Installs dependencies.\n\tqt - Grabs the qt5 repository and initialises it.\n\tmini2d - Installs the mini2d plugin.\n\tconfig - Configures QT.\n\tbuild - Runs make.\n\trun <PLATFORM> <EXAMPLE> - Runs the specified example on the specified platform.\n\tcrun <PLATFORM> <EXAMPLE> - Complete clean rerun. Run after at least one regualar usage.\n\n"
+	printf "Available commands:\n\tclean - Q.E.D.\n\tpkginst - Installs dependencies.\n\tqt - Grabs the qt5 repository and initialises it.\n\tcplatforms - Removes unnecessarry platforms.\n\tconfig - Configures QT.\n\tbuild - Runs make.\n\trun <PLATFORM> <EXAMPLE> - Runs the specified example on the specified platform.\n\tcrun <PLATFORM> <EXAMPLE> - Complete clean rerun. Run after at least one regualar usage.\n\n"
 	exit 0
 fi
 
@@ -60,15 +60,12 @@ then
 fi
 
 # Our platform...
-if [ $COMMAND = "mini2d" ]
+if [ $COMMAND = "cplatforms" ]
 then
-	unzip mini2d.zip
-	mv mini2d qt5/qtbase/src/plugins/platforms
 	rm qt5/qtbase/src/plugins/platforms/platforms.pro
 	cp platforms.pro qt5/qtbase/src/plugins/platforms
-	cat qt5/qtbase/src/plugins/platforms/platforms.pro | grep mini2d
-	ls qt5/qtbase/src/plugins/platforms/mini2d/
-	printf "\n--- DONE(mini2d): Installed mini2d. ---\n\n"
+	cat qt5/qtbase/src/plugins/platforms/platforms.pro | wc -l
+	printf "\n--- DONE(cplatforms): Removed unnecessarry platforms. ---\n\n"
 	exit 0
 fi
 
@@ -138,7 +135,7 @@ then
 	fi
 	./skr clean
 	./skr qt
-	./skr mini2d
+	./skr cplatforms
 	./skr config
 	./skr build
 	./skr run $2 $3
